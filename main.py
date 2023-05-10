@@ -9,8 +9,8 @@ def index():
 
 
 @app.route('/rota')
-def index():
-    return jsonify({"Teste de Deploy": "Welcome to your Flask app 🚅"})
+def index2():
+    return jsonify({"Teste de nova rota"})
 
 
 if __name__ == '__main__':

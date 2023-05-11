@@ -31,8 +31,6 @@ def create_app() -> Flask:
     return app
 
 
-# WSGI keeps the same db connection to all cloned pods at first, which leads to error: "SSL error: decryption failed
-# or bad record mac." Important refresh the connection after postfork
 def dispose_old_db_connection(app: Flask) -> None:
     if not ContextHelper.is_running_inside_wsgi():
         logger.info(
@@ -46,15 +44,14 @@ def dispose_old_db_connection(app: Flask) -> None:
             with app.app_context():
                 db.engine.dispose()
 
-        # from uwsgidecorators import postfork
-        # postfork(_dispose_db_pool)
+        from uwsgidecorators import postfork
+        postfork(_dispose_db_pool)
 
         logger.info("Disposed old db connection successfully")
     except ImportError:
         logger.exception("Error disposing old db connection.")
 
 
-# TODO: Refactor - replace this method with flask blueprint
 def make_imports_into_app():
     import src.routers
 
@@ -65,7 +62,13 @@ def make_imports_into_app():
 
 app: Flask = create_app()
 
-api = Api(app)
+api = Api(app,
+          version='1.0',
+          title='Dogpass API',
+          description='O que falar dessa api que mal conheço e já considero pacas?'
+          )
+
+users_namespace = api.namespace('user', description='Users operations')
 
 cors = CORS(app, resources=r'*', headers='Content-Type')
 

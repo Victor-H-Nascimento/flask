@@ -1,10 +1,10 @@
 from sqlalchemy.orm import sessionmaker, Session
 
-from src.config import Db_config
+from src.config import create_default_db_engine
 
 
 def configure_session() -> Session:
-    engine = Db_config.create_default_db_engine()
+    engine = create_default_db_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
     session.begin()

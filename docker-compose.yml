@@ -15,6 +15,21 @@ services:
       timeout: 2s
       retries: 20
 
+  dogpass-backend:
+    container_name: dogpass-backend
+    image: dogpass-backend
+    build: .
+    restart: always
+    env_file: .env
+    ports:
+      - "5000:5000"
+    volumes:
+      - logs_volume:/var/lib/logs
+    depends_on:
+      - dogpass-postgres
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS localhost:8080/ping || exit 1"]
+
 volumes:
   db_volume:
   logs_volume:

@@ -1,6 +1,7 @@
 from bcrypt import gensalt, hashpw, checkpw
 from flask_sqlalchemy import SQLAlchemy
-from src import db
+
+from src import db, ma
 
 
 class User(db.Model):
@@ -11,6 +12,11 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User {self.name}>'
+
+
+class UserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
 
 
 # class User(db.Model):

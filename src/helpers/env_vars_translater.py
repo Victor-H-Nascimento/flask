@@ -1,5 +1,5 @@
-import os
 from abc import ABC
+from os import getenv
 
 
 class EnvVarsTranslater(ABC):
@@ -7,7 +7,7 @@ class EnvVarsTranslater(ABC):
     def get_bool(env_var_name: str) -> bool:
         valid_values: list[str] = ["true", "false"]
 
-        env_value: str = os.getenv(env_var_name).lower().strip()
+        env_value: str = getenv(env_var_name).lower().strip()
 
         if env_value not in valid_values:
             raise Exception(
@@ -18,7 +18,7 @@ class EnvVarsTranslater(ABC):
 
     @staticmethod
     def get_int(env_var_name: str) -> int:
-        env_value: str = os.getenv(env_var_name).lower().strip()
+        env_value: str = getenv(env_var_name).lower().strip()
 
         try:
             return int(env_value)

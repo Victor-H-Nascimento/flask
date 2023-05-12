@@ -1,11 +1,9 @@
-from http import HTTPStatus
-from flask_restx import Resource, fields
 from flask import request
+from flask_restx import Resource, fields
+from http import HTTPStatus
 
 from src import db, api, users_namespace
-# from src.logs import logger
-from src.models import User
-from src.schemas import UserSchema
+from src.models import User, UserSchema
 from src.routers.helpers import get_response
 
 
@@ -23,7 +21,6 @@ class RouteUser(Resource):
         users = db.session.query(User).all()
         if not users:
             return get_response(HTTPStatus.NO_CONTENT, "No users created yet")
-        # logger.info('get all users')
         return UserSchema(many=True).dump(users)
 
     @users_namespace.doc('create_user')

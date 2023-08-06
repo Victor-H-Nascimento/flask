@@ -39,11 +39,8 @@ RUN pip install --no-cache-dir -r $APP_SRC_PATH/requirements.txt
 
 WORKDIR $APP_PATH
 
-ENV FLASK_APP=main.py
-ENV FLASK_ENV=production
-ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_RUN_PORT=5000
+# Expose port 8080. Nginx will communicate with the application through this port
+EXPOSE 8080
 
-EXPOSE 5000
-
-CMD ["flask", "run"]
+# Start application
+CMD uwsgi --ini $APP_SRC_PATH/config/app.ini

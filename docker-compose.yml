@@ -14,21 +14,48 @@ services:
       interval: 10s
       timeout: 2s
       retries: 20
+    networks:
+      network-dogpass-backend:
+        ipv4_address: 10.10.1.2
 
   dogpass-backend:
     container_name: dogpass-backend
-    image: dogpass-backend
-    build: .
+    image: dogpass-backend # Uses image name built locally
+    build: . # Generate docker image locally
     restart: always
     env_file: .env
-    ports:
-      - "5000:5000"
     volumes:
       - logs_volume:/var/lib/logs
     depends_on:
       - dogpass-postgres
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS localhost:8080/ping || exit 1"]
+    networks:
+      network-dogpass-backend:
+        ipv4_address: 10.10.1.3
+
+  dogpass-backend-nginx:
+    container_name: dogpass-backend-nginx
+    image: dogpass-backend-nginx # Uses image name built locally
+    build: ./nginx # Generate docker image locally
+    restart: always
+    ports:
+      - "5000:80"
+    depends_on:
+      - dogpass-backend
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS localhost:80/ping || exit 1"]
+    networks:
+      network-dogpass-backend:
+        ipv4_address: 10.10.1.4
+
+networks:
+  network-dogpass-backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "10.10.1.0/16"
 
 volumes:
   db_volume:

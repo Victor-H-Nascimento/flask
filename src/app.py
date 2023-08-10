@@ -7,7 +7,7 @@ from flask_restx import Api
 from flask_sqlalchemy import SQLAlchemy
 from os import getenv
 
-from src.config import get_db_con_uri
+from src.config import Db_config
 from src.helpers import EnvVarsTranslater
 
 
@@ -16,7 +16,7 @@ load_dotenv()
 
 def create_app() -> Flask:
     app: Flask = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = get_db_con_uri()
+    app.config['SQLALCHEMY_DATABASE_URI'] = Db_config.get_db_con_uri()
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = getenv(
         'SQLALCHEMY_TRACK_MODIFICATIONS')
     app.config['SECRET_KEY'] = getenv('SESSION_SECRET_KEY')
@@ -43,6 +43,7 @@ api = Api(app,
           )
 
 users_namespace = api.namespace('user', description='Users operations')
+login_namespace = api.namespace('login', description='Login operations')
 
 cors = CORS(app, resources=r'*', headers='Content-Type')
 

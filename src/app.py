@@ -44,6 +44,7 @@ api = Api(app,
 
 users_namespace = api.namespace('user', description='Users operations')
 login_namespace = api.namespace('login', description='Login operations')
+populate_namespace = api.namespace('populate', description='Popular Banco')
 
 cors = CORS(app, resources=r'*', headers='Content-Type')
 

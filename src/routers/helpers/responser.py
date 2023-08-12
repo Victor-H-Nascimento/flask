@@ -2,7 +2,7 @@ from flask import jsonify, make_response, Response
 from loguru import logger
 
 
-def get_response(status_code: int, content: str | dict | list) -> Response:
+def get_response(status_code: int, content: str | dict | list | None) -> Response:
     if isinstance(content, str):
         logger.info(content)
         content = {"message": content}

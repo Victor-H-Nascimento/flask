@@ -9,22 +9,22 @@ from src.models import User, UserSchema
 from src.routers.helpers import get_response, configure_session
 
 
-user_model_create = api.model('User Create', {
-    'email': fields.String(required=True, description='The user email'),
-    'name': fields.String(required=True, description='The user name'),
-    'lastname': fields.String(required=True, description='The user lastname'),
-    'document': fields.String(required=True, description='The user document'),
-    'phone_number': fields.String(required=True, description='The user phone_number'),
-    'pwd': fields.String(required=True, description='The user pwd'),
-    'activated': fields.Boolean(required=False, description='shows if user is activated'),
+user_model_create = api.model('UserCreate', {
+    'email': fields.String(required=True, description='Email do Usuário'),
+    'name': fields.String(required=True, description='Nome do Usuário'),
+    'lastname': fields.String(required=True, description='Sobrenome do Usuário'),
+    'document': fields.String(required=True, description='CPF/RG do Usuário'),
+    'phone_number': fields.String(required=True, description='Telefone do Usuário'),
+    'pwd': fields.String(required=True, description='Senha do Usuário'),
+    'activated': fields.Boolean(required=False, description='Informa se perfil do usuário esta ativo'),
 })
 
-user_model_update = api.model('User Update', {
-    'email': fields.String(required=False, description='The user email'),
-    'name': fields.String(required=False, description='The user name'),
-    'lastname': fields.String(required=False, description='The user lastname'),
-    'document': fields.String(required=False, description='The user document'),
-    'phone_number': fields.String(required=False, description='The user phone_number'),
+user_model_update = api.model('UserUpdate', {
+    'email': fields.String(required=False, description='Email do Usuário'),
+    'name': fields.String(required=False, description='Nome do Usuário'),
+    'lastname': fields.String(required=False, description='Sobrenome do Usuário'),
+    'document': fields.String(required=False, description='CPF/RG do Usuário'),
+    'phone_number': fields.String(required=False, description='Telefone do Usuário'),
 })
 
 
@@ -32,13 +32,13 @@ user_model_update = api.model('User Update', {
 class RouteUser(Resource):
     @app.doc('list_users')
     def get(self):
-        '''List all users'''
+        '''Lista todos os usuários'''
         with closing(configure_session()) as session:
             try:
                 users: User = session.query(User).filter(
                     User.activated).order_by(User.id).all()
                 if not users:
-                    return get_response(HTTPStatus.NO_CONTENT, "No users created yet")
+                    return get_response(HTTPStatus.NO_CONTENT, None)
                 return UserSchema(many=True).dump(users)
             except Exception as e:
                 session.rollback()
@@ -50,7 +50,7 @@ class RouteUser(Resource):
     @app.doc('create_user')
     @app.expect(user_model_create)
     def post(self):
-        '''Create a new user'''
+        '''Cria um novo usuário'''
         with closing(configure_session()) as session:
             try:
                 name: str = request.json.get('name')
@@ -78,13 +78,13 @@ class RouteUser(Resource):
 class RouteUserWithId(Resource):
     @app.doc('list_single_user')
     def get(self, id: int):
-        '''List single user'''
+        '''Mostra usuário pelo id'''
         with closing(configure_session()) as session:
             try:
                 user: User = session.query(User).filter(
                     User.activated).filter(User.id == id).first()
                 if not user:
-                    return get_response(HTTPStatus.NO_CONTENT, f"No user existing with id {id}")
+                    return get_response(HTTPStatus.NO_CONTENT, None)
                 return UserSchema().dump(user)
             except Exception as e:
                 session.rollback()
@@ -96,13 +96,13 @@ class RouteUserWithId(Resource):
     @app.doc('update_single_user')
     @app.expect(user_model_update)
     def put(self, id: int):
-        '''Update single user'''
+        '''Atualiza os dados de um usuário'''
         with closing(configure_session()) as session:
             try:
                 user: User = session.query(User).filter(
                     User.activated).filter(User.id == id).first()
                 if not user:
-                    return get_response(HTTPStatus.NO_CONTENT, f"No user existing with id {id}")
+                    return get_response(HTTPStatus.NO_CONTENT, None)
                 
                 name: str = request.json.get('name')
                 lastname: str = request.json.get('lastname')
@@ -134,13 +134,13 @@ class RouteUserWithId(Resource):
 
     @app.doc('delete_single_user')
     def delete(self, id: int):
-        '''Delete single user'''
+        '''Deleta um usuário'''
         with closing(configure_session()) as session:
             try:
                 user: User = session.query(User).filter(
                     User.activated).filter(User.id == id).first()
                 if not user:
-                    return get_response(HTTPStatus.NO_CONTENT, f"No user existing with id {id}")
+                    return get_response(HTTPStatus.NO_CONTENT, None)
                 user.activated = False
                 session.commit()
                 return get_response(HTTPStatus.OK, f"User {user.email} successfully deactivated")

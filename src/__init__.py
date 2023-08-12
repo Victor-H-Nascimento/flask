@@ -1,1 +1,7 @@
-from src.app import db, ma, api, users_namespace, login_namespace, populate_namespace
+from src.app import api, \
+                    db, \
+                    ma, \
+                    login_namespace, \
+                    pets_namespace, \
+                    populate_namespace, \
+                    users_namespace

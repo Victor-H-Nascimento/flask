@@ -1,4 +1,5 @@
 from bcrypt import gensalt, hashpw, checkpw
+from sqlalchemy.orm import relationship
 
 from src import db, ma
 
@@ -13,6 +14,8 @@ class User(db.Model):
     phone_number = db.Column(db.String(255), nullable=False)
     pwd = db.Column(db.String(255), nullable=False)
     activated = db.Column(db.Boolean, nullable=False)
+
+    pets = relationship("Pet", backref="pets")
 
     def __repr__(self):
         return f'<User {self.name}>'

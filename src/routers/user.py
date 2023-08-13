@@ -127,9 +127,9 @@ class RouteUserWithId(Resource):
 
             except Exception as e:
                 session.rollback()
-                logger.exception(
-                    f'Unable to list user with id {id}. Rollback executed: {str(e)}')
-                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred")
+                msg = f'Unable to list user with id {id}. Rollback executed: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
 
 
     @app.doc('delete_single_user')
@@ -146,6 +146,6 @@ class RouteUserWithId(Resource):
                 return get_response(HTTPStatus.OK, f"User {user.email} successfully deactivated")
             except Exception as e:
                 session.rollback()
-                logger.exception(
-                    f'Unable to delete user with id {id}. Rollback executed: {str(e)}')
-                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred")
+                msg = f'Unable to delete user with id {id}. Rollback executed: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)

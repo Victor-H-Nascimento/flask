@@ -28,17 +28,26 @@ class RoutePopulate(Resource):
 
 
 def create_user(session: Session):
-    email = 'admin@admin.com'
-    name = 'admin'
-    lastname = 'admin'
-    document = '123456789'
-    phone_number = '123456789'
-    pwd = 'admin'
-
-    user: User = session.query(User).filter(User.activated).filter(User.email == email).first()
+    
+    user: User = session.query(User).filter(User.activated).filter(User.email == 'admin@admin.com').first()
 
     if not user:
-        session.add(User(email, name, lastname, document, phone_number, pwd))
+
+        user = {
+            'email': 'admin@admin.com',
+            'name': 'admin',
+            'lastname': 'admin',
+            'document': '123456789',
+            'phone_number': '123456789',
+            'pwd': 'admin',
+            'address': 'Rua João Manuel da Silva',
+            'number': '1234',
+            'zip_code': '13046-240',
+            'neighborhood': 'Parque dos Cisnes',
+        }
+
+        session.add(User(user['email'], user['name'], user['lastname'], user['document'], user['phone_number'],
+                          user['pwd'], user['address'], user['number'], user['zip_code'], user['neighborhood']))
         session.commit()
 
 

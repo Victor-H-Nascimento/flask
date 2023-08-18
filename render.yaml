@@ -1,3 +1,0 @@
-- name: app
-  buildCommand: pip install -r src/requirements.txt
-  startCommand: alembic upgrade head && gunicorn main:app

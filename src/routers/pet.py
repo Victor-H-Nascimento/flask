@@ -11,10 +11,10 @@ from src.routers.helpers import get_response, configure_session
 pet_model_create = api.model('PetCreate', {
     'name': fields.String(required=True, description='Nome do Pet'),
     'size': fields.String(required=True, description='Tamanho do Pet'),
-    'breed': fields.Integer(required=True, description='Id da Raça do Pet'),
+    'breed': fields.String(required=True, description='Raça do Pet'),
     'age': fields.String(required=True, description='Idade do Pet'),
     'castrated': fields.Boolean(required=True, description='Informa se Pet é castrado'),
-    'weight': fields.String(required=True, description='Peso do Pet'),
+    'weight': fields.Float(required=True, description='Peso do Pet'),
     'specie': fields.String(required=True, description='Espécie do Pet'),
     'gender': fields.String(required=True, description='Gênero do Pet'),
     'user_id': fields.Integer(required=True, description='Id do Tutor do Pet'),
@@ -24,10 +24,10 @@ pet_model_create = api.model('PetCreate', {
 pet_model_update = api.model('PetUpdate', {
     'name': fields.String(required=False, description='Nome do Pet'),
     'size': fields.String(required=False, description='Tamanho do Pet'),
-    'breed': fields.Integer(required=False, description='Id da Raça do Pet'),
+    'breed': fields.String(required=False, description='Raça do Pet'),
     'age': fields.String(required=False, description='Idade do Pet'),
     'castrated': fields.Boolean(required=False, description='Informa se Pet é castrado'),
-    'weight': fields.String(required=False, description='Peso do Pet'),
+    'weight': fields.Float(required=False, description='Peso do Pet'),
     'specie': fields.String(required=False, description='Espécie do Pet'),
     'gender': fields.String(required=False, description='Gênero do Pet'),
 })
@@ -58,10 +58,10 @@ class RoutePet(Resource):
             try:
                 name: str = request.json.get('name')
                 size: str = request.json.get('size')
-                breed: int = request.json.get('breed')
+                breed: str = request.json.get('breed')
                 age: str = request.json.get('age')
                 castrated: bool = request.json.get('castrated')
-                weight: str = request.json.get('weight')
+                weight: float = request.json.get('weight')
                 specie: str = request.json.get('specie')
                 gender: str = request.json.get('gender')
                 user_id: int = request.json.get('user_id')

@@ -40,7 +40,7 @@ class RoutePet(Resource):
         with closing(configure_session()) as session:
             try:
                 pets: Pet = session.query(Pet).filter(
-                    Pet.activated).order_by(Pet.id).all()
+                    Pet.activated).order_by(Pet.name).all()
                 if not pets:
                     return get_response(HTTPStatus.NO_CONTENT, None)
                 return PetSchema(many=True).dump(pets)

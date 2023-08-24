@@ -10,9 +10,7 @@ from os import getenv
 from src.config import Db_config
 from src.helpers import EnvVarsTranslater
 
-
 load_dotenv()
-
 
 def create_app() -> Flask:
     app: Flask = Flask(__name__)
@@ -37,7 +35,7 @@ def make_imports_into_app():
 app: Flask = create_app()
 
 api = Api(app,
-          version='2.0',
+          version='2.1',
           title='Dogpass API',
           description='O que falar dessa api que mal conheço e já considero pacas?'
           )
@@ -45,6 +43,8 @@ api = Api(app,
 users_namespace = api.namespace('users', description='Operações de usuário')
 login_namespace = api.namespace('login', description='Operações de login')
 pets_namespace = api.namespace('pets', description='Operações de Pets')
+clinicas_namespace = api.namespace('clinicas', description='Operações de Clinicas')
+vets_namespace = api.namespace('vets', description='Operações de Vets')
 populate_namespace = api.namespace('populate', description='Popular Banco')
 
 cors = CORS(app, resources=r'*', headers='Content-Type')

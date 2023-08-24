@@ -5,7 +5,7 @@ from loguru import logger
 from sqlalchemy.orm import Session
 
 from src import populate_namespace as app
-from src.models import Pet, User
+from src.models import Clinica, Pet, User, Vet
 from src.routers.helpers import get_response, configure_session
 
 
@@ -16,6 +16,8 @@ class RoutePopulate(Resource):
             try:
                 create_user(session)
                 create_pets(session)
+                create_clinica(session)
+                create_vets(session)
             except Exception as e:
                 msg = f'Unable to populate database. Rollback executed: {str(e)}'
                 session.rollback()
@@ -85,4 +87,54 @@ def create_pets(session: Session):
         
         for pet in pets:
             session.add(Pet(pet['name'], pet['size'], pet['breed'], pet['age'], pet['castrated'], pet['weight'], pet['specie'], pet['gender'], pet['user_id']))
+        session.commit()
+
+
+def create_clinica(session: Session):
+    
+    clinica: Clinica = session.query(Clinica).filter(Clinica.activated).filter(Clinica.cnpj == '52.181.712/0001-58').first()
+
+    if not clinica:
+
+        clinica = {
+            'name': 'Animale Pet Care',
+            'cnpj': '52.181.712/0001-58',
+            'address': 'Rua Cônego Manoel Garcia',
+            'number': '167',
+            'zip_code': '13070-036',
+            'neighborhood': 'Jardim Novo Chapadão',
+            'username': 'Animale',
+            'pwd': 'Animale1234',
+        }
+
+        session.add(Clinica(clinica['name'], clinica['cnpj'], clinica['address'], clinica['number'], clinica['zip_code'],
+                          clinica['neighborhood'], clinica['username'], clinica['pwd']))
+        session.commit()
+
+
+def create_vets(session: Session):
+    
+    clinica_id = session.query(Clinica.id).filter(Clinica.activated).filter(Clinica.cnpj == '52.181.712/0001-58').scalar()
+
+    vet: Vet = session.query(Vet).filter(Vet.activated).all()
+
+    if not vet:
+        vets = [
+            {
+                'name': 'Dra. Thais Cruz',
+                'username': 'thais.cruz',
+                'pwd': 'Animale123',
+                'clinica_id': clinica_id,
+                
+            },
+            {
+                'name': 'Dr. João Flávio',
+                'username': 'joao.flavio',
+                'pwd': 'Animale123',
+                'clinica_id': clinica_id,
+            },
+        ]
+        
+        for vet in vets:
+            session.add(Vet(vet['name'], vet['username'], vet['pwd'], vet['clinica_id']))
         session.commit()

@@ -18,7 +18,6 @@ pet_model_create = api.model('PetCreate', {
     'specie': fields.String(required=True, description='Espécie do Pet'),
     'gender': fields.String(required=True, description='Gênero do Pet'),
     'user_id': fields.Integer(required=True, description='Id do Tutor do Pet'),
-    'activated': fields.Boolean(required=False, description='Informa se perfil do pet esta ativo'),
 })
 
 pet_model_update = api.model('PetUpdate', {

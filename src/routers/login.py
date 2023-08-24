@@ -15,8 +15,8 @@ from src.routers.helpers import get_response, configure_session
 load_dotenv()
 
 login_model = api.model('Login', {
-    'email': fields.String(required=True, description='The user email'),
-    'pwd': fields.String(required=True, description='The user pwd'),
+    'email': fields.String(required=True, description='Email do usuário'),
+    'pwd': fields.String(required=True, description='Senha do usuário'),
 })
 
 

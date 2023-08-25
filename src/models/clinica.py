@@ -1,7 +1,14 @@
 from bcrypt import gensalt, hashpw, checkpw
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
+
 from src import db, ma
+from src.models.services import ServicesSchema
+
+clinicas_services = db.Table("clinicas_services",
+                                 db.Column("clinicas_id", ForeignKey("clinicas.id")),
+                                 db.Column("services_id", ForeignKey("services.id")))
 
 
 class Clinica(db.Model):
@@ -17,6 +24,8 @@ class Clinica(db.Model):
     pwd = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(255), nullable=False)
     activated = db.Column(db.Boolean, nullable=False)
+
+    services = relationship("Services", secondary=clinicas_services, backref="clinica")
 
     vets = relationship("Vet", backref="vets")
 
@@ -51,4 +60,6 @@ class ClinicaSchema(ma.SQLAlchemyAutoSchema):
                   "zip_code",
                   "neighborhood",
                   "role",
+                  "services",
                   )
+    services = ma.List(ma.Nested(ServicesSchema))

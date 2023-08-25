@@ -5,7 +5,7 @@ from loguru import logger
 from sqlalchemy.orm import Session
 
 from src import populate_namespace as app
-from src.models import Clinica, Pet, User, Vet
+from src.models import Clinica, Pet, Services, User, Vet
 from src.routers.helpers import get_response, configure_session
 
 
@@ -18,6 +18,7 @@ class RoutePopulate(Resource):
                 create_pets(session)
                 create_clinica(session)
                 create_vets(session)
+                create_services(session)
             except Exception as e:
                 msg = f'Unable to populate database. Rollback executed: {str(e)}'
                 session.rollback()
@@ -138,3 +139,31 @@ def create_vets(session: Session):
         for vet in vets:
             session.add(Vet(vet['name'], vet['username'], vet['pwd'], vet['clinica_id']))
         session.commit()
+
+
+def create_services(session: Session):
+    
+        services = [
+            {
+                'name': 'Banho e Tosa',
+            },
+            {
+                'name': 'Vacinas',
+            },
+            {
+                'name': 'Consultas',
+            },
+            {
+                'name': 'Raio-X',
+            },
+            {
+                'name': 'Ultrassom',
+            },
+        ]
+        
+        for service in services:
+            name = service['name']
+            serv: Services = session.query(Services).filter(Services.activated).filter(Services.name == name).first()
+            if not serv:
+                session.add(Services(name))
+                session.commit()

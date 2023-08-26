@@ -65,24 +65,19 @@ class RouteVet(Resource):
 
 @app.route('/<int:id>')
 class RouteVetWithId(Resource):
-    @app.doc('list all vets from a clinic')
+    @app.doc('list single vet')
     def get(self, id: int):
-        '''Mostra todos os vets de uma clinica.USAR O ID DA CLINICA'''
+        '''Mostra um vet pelo id'''
         with closing(configure_session()) as session:
             try:
-                clinica: Clinica = session.query(Clinica).filter(
-                    Clinica.activated).filter(Clinica.id == id).first()
-                if not clinica:
+                vet: Vet = session.query(Vet).filter(
+                    Vet.activated).filter(Vet.id == id).first()
+                if not vet:
                     return get_response(HTTPStatus.NO_CONTENT, None)
-
-                vets: Vet = session.query(Vet).filter(
-                    Vet.activated).filter(Vet.clinica_id == id).order_by(Vet.name).all()
-                if not vets:
-                    return get_response(HTTPStatus.NO_CONTENT, None)
-                return VetSchema(many=True).dump(vets)
+                return VetSchema(many=False).dump(vet)
             except Exception as e:
                 session.rollback()
-                msg = f'Unable to list all vets. Rollback executed: {str(e)}'
+                msg = f'Unable to get vet with id {id}. Rollback executed: {str(e)}'
                 logger.exception(msg)
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
     
@@ -132,5 +127,29 @@ class RouteVetWithId(Resource):
             except Exception as e:
                 session.rollback()
                 msg = f'Unable to delete vet with id {id}. Rollback executed: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+
+
+@app.route('/clinicas/<int:id>')
+class RouteVetFromClinica(Resource):
+    @app.doc('list all vets from a clinic')
+    def get(self, id: int):
+        '''Mostra todos os vets de uma clinica.USAR O ID DA CLINICA'''
+        with closing(configure_session()) as session:
+            try:
+                clinica: Clinica = session.query(Clinica).filter(
+                    Clinica.activated).filter(Clinica.id == id).first()
+                if not clinica:
+                    return get_response(HTTPStatus.NO_CONTENT, None)
+
+                vets: Vet = session.query(Vet).filter(
+                    Vet.activated).filter(Vet.clinica_id == id).order_by(Vet.name).all()
+                if not vets:
+                    return get_response(HTTPStatus.NO_CONTENT, None)
+                return VetSchema(many=True).dump(vets)
+            except Exception as e:
+                session.rollback()
+                msg = f'Unable to list all vets. Rollback executed: {str(e)}'
                 logger.exception(msg)
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)

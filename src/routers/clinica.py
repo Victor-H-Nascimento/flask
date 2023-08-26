@@ -5,7 +5,7 @@ from http import HTTPStatus
 from loguru import logger
 
 from src import api, clinicas_namespace as app
-from src.models import Clinica, ClinicaSchema, Services
+from src.models import Clinica, ClinicaSchema, Services, ServicesSchema
 from src.routers.helpers import get_response, configure_session
 
 
@@ -195,6 +195,55 @@ class RouteClinicaWithQueryParams(Resource):
                 return get_response(HTTPStatus.OK, f"Service {service.name} successfully added to Clinic {clinica.name}")
             except Exception as e:
                 session.rollback()
-                msg = f'Unable to create a new clinica. Rollback executed: {str(e)}'
+                msg = f'Unable to add connection between clinic and service. Rollback executed: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+            
+
+    @api.expect(clinica_servico_model, validate=True)
+    def delete(self):
+        '''Deleta conexao entre clinica e serviço'''
+        with closing(configure_session()) as session:
+            try:
+
+                clinica_id: int = request.json.get('clinica')
+                servico_id: int = request.json.get('servico')
+
+                if not (clinica_id or servico_id):
+                    return get_response(HTTPStatus.BAD_REQUEST, "Unable to disconnect clinica to service. Missing at least one mandatory field")
+                
+                clinica: Clinica = session.query(Clinica).filter(Clinica.activated).filter(Clinica.id == clinica_id).first()
+                service: Services = session.query(Services).filter(Services.activated).filter(Services.id == servico_id).first()
+
+                if not (clinica or service):
+                    return get_response(HTTPStatus.BAD_REQUEST, "Unable to disconnect clinica to service. Not found clinic or service")
+
+                clinica.services.remove(service)
+                session.commit()
+
+                return get_response(HTTPStatus.OK, f"Service {service.name} successfully removed from Clinic {clinica.name}")
+            except Exception as e:
+                session.rollback()
+                msg = f'Unable to remove connection between clinic and service. Rollback executed: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+
+@app.route('/<int:id>/services')
+class RouteServicesFromClinic(Resource):
+    def get(self, id: int):
+        '''Retorna todos os serviços de uma clinica'''
+        with closing(configure_session()) as session:
+            try:
+
+                clinica: Clinica = session.query(Clinica).filter(Clinica.activated).filter(Clinica.id == id).first()
+
+                if not clinica:
+                    return get_response(HTTPStatus.BAD_REQUEST, f"Unable to get services from clinic with id {id}")
+                
+                services = clinica.services
+
+                return ServicesSchema(many=True).dump(services), HTTPStatus.OK
+            except Exception as e:
+                msg = f'Unable to get services from clinic {clinica.name}: {str(e)}'
                 logger.exception(msg)
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)

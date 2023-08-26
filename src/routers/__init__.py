@@ -1,4 +1,4 @@
-from src.routers.clinica import RouteClinica, RouteClinicaWithId, RouteClinicaWithQueryParams
+from src.routers.clinica import RouteClinica, RouteClinicaWithId, RouteClinicaWithQueryParams, RouteServicesFromClinic
 from src.routers.login import RouteLogin
 from src.routers.pet import RoutePet, RoutePetWithId, RoutePetFromUserId
 from src.routers.populate import RoutePopulate

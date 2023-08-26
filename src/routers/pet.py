@@ -81,21 +81,16 @@ class RoutePet(Resource):
 
 @app.route('/<int:id>')
 class RoutePetWithId(Resource):
-    @app.doc('list all pets from an user')
+    @app.doc('list a single pet')
     def get(self, id: int):
-        '''Mostra todos os pets de um usuario'''
+        '''Lista um pet pelo id'''
         with closing(configure_session()) as session:
             try:
-                user: User = session.query(User).filter(
-                    User.activated).filter(User.id == id).first()
-                if not user:
+                pet: Pet = session.query(Pet).filter(
+                    Pet.activated).filter(Pet.id == id).first()
+                if not pet:
                     return get_response(HTTPStatus.NO_CONTENT, None)
-
-                pets: Pet = session.query(Pet).filter(
-                    Pet.activated).filter(Pet.user_id == id).order_by(Pet.name).all()
-                if not pets:
-                    return get_response(HTTPStatus.NO_CONTENT, None)
-                return PetSchema(many=True).dump(pets)
+                return PetSchema(many=False).dump(pet)
             except Exception as e:
                 session.rollback()
                 msg = f'Unable to list all pets. Rollback executed: {str(e)}'
@@ -166,5 +161,29 @@ class RoutePetWithId(Resource):
             except Exception as e:
                 session.rollback()
                 msg = f'Unable to delete pet with id {id}. Rollback executed: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+
+
+@app.route('/users/<int:id>')
+class RoutePetFromUserId(Resource):
+    @app.doc('list all pets from an user')
+    def get(self, id: int):
+        '''Mostra todos os pets de um usuario'''
+        with closing(configure_session()) as session:
+            try:
+                user: User = session.query(User).filter(
+                    User.activated).filter(User.id == id).first()
+                if not user:
+                    return get_response(HTTPStatus.NO_CONTENT, None)
+
+                pets: Pet = session.query(Pet).filter(
+                    Pet.activated).filter(Pet.user_id == id).order_by(Pet.name).all()
+                if not pets:
+                    return get_response(HTTPStatus.NO_CONTENT, None)
+                return PetSchema(many=True).dump(pets)
+            except Exception as e:
+                session.rollback()
+                msg = f'Unable to list all pets. Rollback executed: {str(e)}'
                 logger.exception(msg)
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)

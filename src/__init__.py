@@ -6,4 +6,5 @@ from src.app import api, \
                     pets_namespace, \
                     populate_namespace, \
                     users_namespace, \
+                    services_namespace, \
                     vets_namespace

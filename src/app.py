@@ -45,6 +45,7 @@ login_namespace = api.namespace('login', description='Operações de login')
 pets_namespace = api.namespace('pets', description='Operações de Pets')
 clinicas_namespace = api.namespace('clinicas', description='Operações de Clinicas')
 vets_namespace = api.namespace('vets', description='Operações de Vets')
+services_namespace = api.namespace('services', description='Operações de Serviços')
 populate_namespace = api.namespace('populate', description='Popular Banco')
 
 cors = CORS(app, resources=r'*', headers='Content-Type')

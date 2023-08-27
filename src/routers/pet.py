@@ -18,6 +18,7 @@ pet_model_create = api.model('PetCreate', {
     'specie': fields.String(required=True, description='Espécie do Pet'),
     'gender': fields.String(required=True, description='Gênero do Pet'),
     'user_id': fields.Integer(required=True, description='Id do Tutor do Pet'),
+    'description': fields.String(required=False, description='Breve Descriçao do Pet'),
 })
 
 pet_model_update = api.model('PetUpdate', {
@@ -29,6 +30,7 @@ pet_model_update = api.model('PetUpdate', {
     'weight': fields.Float(required=False, description='Peso do Pet'),
     'specie': fields.String(required=False, description='Espécie do Pet'),
     'gender': fields.String(required=False, description='Gênero do Pet'),
+    'description': fields.String(required=False, description='Breve Descriçao do Pet'),
 })
 
 @app.route('')
@@ -64,11 +66,12 @@ class RoutePet(Resource):
                 specie: str = request.json.get('specie')
                 gender: str = request.json.get('gender')
                 user_id: int = request.json.get('user_id')
+                description: str = request.json.get('description')
 
                 if None in (name, size, breed, age, castrated, weight, specie, gender, user_id):
                     return get_response(HTTPStatus.BAD_REQUEST, "Unable to create pet. Missing at least one mandatory field")
 
-                pet = Pet(name, size, breed, age, castrated, weight, specie, gender, user_id)
+                pet = Pet(name, size, breed, age, castrated, weight, specie, gender, user_id, description)
                 session.add(pet)
                 session.commit()
                 return PetSchema().dump(pet), HTTPStatus.CREATED
@@ -117,6 +120,7 @@ class RoutePetWithId(Resource):
                 weight: str = request.json.get('weight')
                 specie: str = request.json.get('specie')
                 gender: str = request.json.get('gender')
+                description: str = request.json.get('description')
 
                 if name:
                     pet.name = name
@@ -134,6 +138,8 @@ class RoutePetWithId(Resource):
                     pet.specie = specie
                 if gender:
                     pet.gender = gender
+                if description:
+                    pet.description = description
                 
                 session.commit()
 
@@ -187,3 +193,4 @@ class RoutePetFromUserId(Resource):
                 msg = f'Unable to list all pets. Rollback executed: {str(e)}'
                 logger.exception(msg)
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+            

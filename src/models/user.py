@@ -17,6 +17,8 @@ class User(db.Model):
     number = db.Column(db.String(255), nullable=True)
     zip_code = db.Column(db.String(255), nullable=True)
     neighborhood = db.Column(db.String(255), nullable=True)
+    username = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(255), nullable=False)
     activated = db.Column(db.Boolean, nullable=False)
 
     pets = relationship("Pet", backref="pets")
@@ -25,7 +27,8 @@ class User(db.Model):
         return f'<User {self.name}>'
 
     def __init__(self, email: str, name: str, lastname: str, document: str, phone_number: str,  pwd: str,
-                    address: str, number: str, zip_code: str, neighborhood: str, activated: bool = True):
+                    address: str, number: str, zip_code: str, neighborhood: str,
+                    username: str, role: str = 'user', activated: bool = True):
         self.email = email
         self.name = name
         self.lastname = lastname
@@ -36,6 +39,8 @@ class User(db.Model):
         self.number = number
         self.zip_code = zip_code
         self.neighborhood = neighborhood
+        self.username = username
+        self.role = role
         self.activated = activated
 
     def verify_password(self, pwd):
@@ -53,4 +58,5 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
                   "number",
                   "zip_code",
                   "neighborhood",
+                  "role",
                   )

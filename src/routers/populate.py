@@ -1,3 +1,4 @@
+
 from contextlib import closing
 from flask_restx import Resource
 from http import HTTPStatus
@@ -47,10 +48,12 @@ def create_user(session: Session):
             'number': '1234',
             'zip_code': '13046-240',
             'neighborhood': 'Parque dos Cisnes',
+            'username': 'admin',
         }
 
-        session.add(User(user['email'], user['name'], user['lastname'], user['document'], user['phone_number'],
-                          user['pwd'], user['address'], user['number'], user['zip_code'], user['neighborhood']))
+        session.add(User(user['email'], user['name'], user['lastname'], user['document'],
+                        user['phone_number'], user['pwd'], user['address'], user['number'],
+                        user['zip_code'], user['neighborhood'], user['username']))
         session.commit()
 
 
@@ -71,6 +74,7 @@ def create_pets(session: Session):
                 'weight': 30,
                 'specie': 'cachorro',
                 'gender': 'femea',
+                'description': 'Uma cachorra docil e amiga de todos',
                 'user_id': user_id,
             },
             {
@@ -82,12 +86,15 @@ def create_pets(session: Session):
                 'weight': 3.5,
                 'specie': 'gato',
                 'gender': 'macho',
+                'description': None,
                 'user_id': user_id,
             },
         ]
         
         for pet in pets:
-            session.add(Pet(pet['name'], pet['size'], pet['breed'], pet['age'], pet['castrated'], pet['weight'], pet['specie'], pet['gender'], pet['user_id']))
+            session.add(Pet(pet['name'], pet['size'], pet['breed'], pet['age'],
+                            pet['castrated'], pet['weight'], pet['specie'],
+                            pet['gender'], pet['user_id'], pet['description']))
         session.commit()
 
 

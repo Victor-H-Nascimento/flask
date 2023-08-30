@@ -7,8 +7,12 @@ from src import db, ma
 from src.models.services import ServicesSchema
 
 clinicas_services = db.Table("clinicas_services",
-                                 db.Column("clinicas_id", ForeignKey("clinicas.id")),
-                                 db.Column("services_id", ForeignKey("services.id")))
+                    db.Column("clinicas_id", ForeignKey("clinicas.id")),
+                    db.Column("services_id", ForeignKey("services.id")))
+
+pets_clinicas = db.Table("pets_clinicas",
+                db.Column("pets_id", ForeignKey("pets.id")),
+                db.Column("clinicas_id", ForeignKey("clinicas.id")))
 
 
 class Clinica(db.Model):
@@ -26,7 +30,7 @@ class Clinica(db.Model):
     activated = db.Column(db.Boolean, nullable=False)
 
     services = relationship("Services", secondary=clinicas_services, backref="clinica")
-
+    pets = relationship("Pet", secondary=pets_clinicas, backref="clinica_pet")
     vets = relationship("Vet", backref="vets")
 
     def __repr__(self):

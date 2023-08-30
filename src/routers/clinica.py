@@ -180,13 +180,13 @@ class RouteClinicaWithQueryParams(Resource):
                 clinica_id: int = request.json.get('clinica')
                 servico_id: int = request.json.get('servico')
 
-                if not (clinica_id or servico_id):
+                if not (clinica_id and servico_id):
                     return get_response(HTTPStatus.BAD_REQUEST, "Unable to connect clinica to service. Missing at least one mandatory field")
                 
                 clinica: Clinica = session.query(Clinica).filter(Clinica.activated).filter(Clinica.id == clinica_id).first()
                 service: Services = session.query(Services).filter(Services.activated).filter(Services.id == servico_id).first()
 
-                if not (clinica or service):
+                if not (clinica and service):
                     return get_response(HTTPStatus.BAD_REQUEST, "Unable to connect clinica to service. Not found clinic or service")
 
                 clinica.services.append(service)
@@ -209,13 +209,13 @@ class RouteClinicaWithQueryParams(Resource):
                 clinica_id: int = request.json.get('clinica')
                 servico_id: int = request.json.get('servico')
 
-                if not (clinica_id or servico_id):
+                if not (clinica_id and servico_id):
                     return get_response(HTTPStatus.BAD_REQUEST, "Unable to disconnect clinica to service. Missing at least one mandatory field")
                 
                 clinica: Clinica = session.query(Clinica).filter(Clinica.activated).filter(Clinica.id == clinica_id).first()
                 service: Services = session.query(Services).filter(Services.activated).filter(Services.id == servico_id).first()
 
-                if not (clinica or service):
+                if not (clinica and service):
                     return get_response(HTTPStatus.BAD_REQUEST, "Unable to disconnect clinica to service. Not found clinic or service")
 
                 clinica.services.remove(service)

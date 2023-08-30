@@ -5,7 +5,7 @@ from http import HTTPStatus
 from loguru import logger
 
 from src import api, pets_namespace as app
-from src.models import Pet, PetSchema, User
+from src.models import Clinica, ClinicaSchema, Pet, PetSchema, User, pets_clinicas
 from src.routers.helpers import get_response, configure_session
 
 pet_model_create = api.model('PetCreate', {
@@ -31,6 +31,12 @@ pet_model_update = api.model('PetUpdate', {
     'specie': fields.String(required=False, description='Espécie do Pet'),
     'gender': fields.String(required=False, description='Gênero do Pet'),
     'description': fields.String(required=False, description='Breve Descriçao do Pet'),
+})
+
+
+pet_clinica_model = api.model('Pet-Clinica-Connect', {
+    'clinica': fields.Integer(description='ID da clinica', required=True),
+    'pet': fields.Integer(description='ID do pet', required=True)
 })
 
 @app.route('')
@@ -171,6 +177,66 @@ class RoutePetWithId(Resource):
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
 
 
+@app.route('/connect')
+class RoutePetConnect(Resource):
+    @api.expect(pet_clinica_model, validate=True)
+    def post(self):
+        '''Conecta um pet à uma clinica'''
+        with closing(configure_session()) as session:
+            try:
+
+                clinica_id: int = request.json.get('clinica')
+                pet_id: int = request.json.get('pet')
+
+                if not (clinica_id and pet_id):
+                    return get_response(HTTPStatus.BAD_REQUEST, "Unable to connect clinica to pet. Missing at least one mandatory field")
+                
+                clinica: Clinica = session.query(Clinica).filter(Clinica.activated).filter(Clinica.id == clinica_id).first()
+                pet: Pet = session.query(Pet).filter(Pet.activated).filter(Pet.id == pet_id).first()
+
+                if not (clinica and pet):
+                    return get_response(HTTPStatus.BAD_REQUEST, "Unable to connect clinica to pet. Not found clinic or pet")
+
+                clinica.pets.append(pet)
+                session.commit()
+
+                return get_response(HTTPStatus.OK, f"Pet {pet.name} successfully added to Clinic {clinica.name}")
+            except Exception as e:
+                session.rollback()
+                msg = f'Unable to add connection between clinic and pet. Rollback executed: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+    
+
+    @api.expect(pet_clinica_model, validate=True)
+    def delete(self):
+        '''Deleta conexao entre pet e clinica'''
+        with closing(configure_session()) as session:
+            try:
+
+                clinica_id: int = request.json.get('clinica')
+                pet_id: int = request.json.get('pet')
+
+                if not (clinica_id and pet_id):
+                    return get_response(HTTPStatus.BAD_REQUEST, "Unable to disconnect pet from clinic. Missing at least one mandatory field")
+                
+                clinica: Clinica = session.query(Clinica).filter(Clinica.activated).filter(Clinica.id == clinica_id).first()
+                pet: Pet = session.query(Pet).filter(Pet.activated).filter(Pet.id == pet_id).first()
+
+                if not (clinica and pet):
+                    return get_response(HTTPStatus.BAD_REQUEST, "Unable to disconnect pet from clinic. Not found clinic or pet")
+
+                clinica.pets.remove(pet)
+                session.commit()
+
+                return get_response(HTTPStatus.OK, f"Pet {pet.name} successfully removed from Clinic {clinica.name}")
+            except Exception as e:
+                session.rollback()
+                msg = f'Unable to remove connection between clinic and pet. Rollback executed: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+
+
 @app.route('/users/<int:id>')
 class RoutePetFromUserId(Resource):
     @app.doc('list all pets from an user')
@@ -193,4 +259,22 @@ class RoutePetFromUserId(Resource):
                 msg = f'Unable to list all pets. Rollback executed: {str(e)}'
                 logger.exception(msg)
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
-            
+
+
+@app.route('/<int:id>/services')
+class RoutePetShowServices(Resource):
+    def get(self, id: int):
+        '''Mostra todos os serviços que um pet esteja conectado'''
+        with closing(configure_session()) as session:
+            try:
+                pet: Pet = session.query(Pet).filter(Pet.activated).filter(Pet.id == id).first()
+                if not pet:
+                    return get_response(HTTPStatus.NO_CONTENT, None)
+                
+                clinicas: Clinica = session.query(Clinica).outerjoin(pets_clinicas, pets_clinicas.c.pets_id == Clinica.id).order_by(Clinica.name).all()
+
+                return ClinicaSchema(many=True).dump(clinicas)
+            except Exception as e:
+                msg = f'Unable to list all services a pet is connected: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)

@@ -17,9 +17,11 @@ class RoutePopulate(Resource):
             try:
                 create_user(session)
                 create_pets(session)
-                create_clinica(session)
+                create_clinic(session)
                 create_vets(session)
                 create_services(session)
+                connect_services_clinics(session)
+                connect_services_pets(session)
             except Exception as e:
                 msg = f'Unable to populate database. Rollback executed: {str(e)}'
                 session.rollback()
@@ -98,7 +100,7 @@ def create_pets(session: Session):
         session.commit()
 
 
-def create_clinica(session: Session):
+def create_clinic(session: Session):
     
     clinica: Clinica = session.query(Clinica).filter(Clinica.activated).filter(Clinica.cnpj == '52.181.712/0001-58').first()
 
@@ -174,3 +176,23 @@ def create_services(session: Session):
             if not serv:
                 session.add(Services(name))
                 session.commit()
+
+
+def connect_services_clinics(session: Session):
+    
+    clinica: Clinica = session.query(Clinica).filter(Clinica.activated).filter(Clinica.id == 1).first()
+    services: Services = session.query(Services).filter(Services.activated).all()
+
+    for service in services:
+        clinica.services.append(service)
+    session.commit()
+
+
+def connect_services_pets(session: Session):
+    
+    clinica: Clinica = session.query(Clinica).filter(Clinica.activated).filter(Clinica.id == 1).first()
+    pets: Pet = session.query(Pet).filter(Pet.activated).all()
+
+    for pet in pets:
+        clinica.pets.append(pet)
+    session.commit()

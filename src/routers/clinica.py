@@ -30,7 +30,7 @@ clinica_model_update = api.model('ClinicaUpdate', {
 })
 
 
-clinica_servico_model = api.model('Clinica-Service-Create', {
+clinica_servico_model = api.model('Clinica-Service-Connect', {
     'clinica': fields.Integer(description='ID da clínica', required=True),
     'servico': fields.Integer(description='ID do serviço', required=True)
 })
@@ -39,7 +39,7 @@ clinica_servico_model = api.model('Clinica-Service-Create', {
 class RouteClinica(Resource):
     @app.doc('list_clinicas')
     def get(self):
-        '''Lista todos as clinicas'''
+        '''Lista todas as clinicas'''
         with closing(configure_session()) as session:
             try:
                 clinicas: Clinica = session.query(Clinica).filter(
@@ -202,7 +202,7 @@ class RouteClinicaWithQueryParams(Resource):
 
     @api.expect(clinica_servico_model, validate=True)
     def delete(self):
-        '''Deleta conexao entre clinica e serviço'''
+        '''Deleta conexão entre clinica e serviço'''
         with closing(configure_session()) as session:
             try:
 
@@ -231,7 +231,7 @@ class RouteClinicaWithQueryParams(Resource):
 @app.route('/<int:id>/services')
 class RouteServicesFromClinic(Resource):
     def get(self, id: int):
-        '''Retorna todos os serviços de uma clinica'''
+        '''Retorna todos os serviços de uma clínica'''
         with closing(configure_session()) as session:
             try:
 

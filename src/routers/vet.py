@@ -135,7 +135,7 @@ class RouteVetWithId(Resource):
 class RouteVetFromClinica(Resource):
     @app.doc('list all vets from a clinic')
     def get(self, id: int):
-        '''Mostra todos os vets de uma clinica.USAR O ID DA CLINICA'''
+        '''Mostra todos os vets de uma clinica.'''
         with closing(configure_session()) as session:
             try:
                 clinica: Clinica = session.query(Clinica).filter(

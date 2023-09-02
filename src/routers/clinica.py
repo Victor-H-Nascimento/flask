@@ -247,3 +247,25 @@ class RouteServicesFromClinic(Resource):
                 msg = f'Unable to get services from clinic {clinica.name}: {str(e)}'
                 logger.exception(msg)
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+
+
+@app.route('/<int:id>/pets')
+class RoutePetsFromClinic(Resource):
+    def get(self, id: int):
+        '''Retorna todos os pets de uma clínica'''
+        with closing(configure_session()) as session:
+            try:
+
+                clinica: Clinica = session.query(Clinica).filter(Clinica.activated).filter(Clinica.id == id).first()
+
+                if not clinica:
+                    return get_response(HTTPStatus.BAD_REQUEST, f"Unable to get pets from clinic with id {id}")
+                
+                pets = clinica.pets
+
+                return ServicesSchema(many=True).dump(pets), HTTPStatus.OK
+            except Exception as e:
+                msg = f'Unable to get pets from clinic {clinica.name}: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+            

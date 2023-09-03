@@ -113,8 +113,8 @@ def create_clinic(session: Session):
             'number': '167',
             'zip_code': '13070-036',
             'neighborhood': 'Jardim Novo Chapadão',
-            'username': 'Animale',
-            'pwd': 'Animale1234',
+            'username': 'admin clinica',
+            'pwd': 'admin',
         }
 
         session.add(Clinica(clinica['name'], clinica['cnpj'], clinica['address'], clinica['number'], clinica['zip_code'],
@@ -142,6 +142,13 @@ def create_vets(session: Session):
                 'username': 'joao.flavio',
                 'pwd': 'Animale123',
                 'clinica_id': clinica_id,
+            },
+            {
+                'name': 'Dra. Admin Silva',
+                'username': 'admin.silva',
+                'pwd': 'admin',
+                'clinica_id': clinica_id,
+                
             },
         ]
         

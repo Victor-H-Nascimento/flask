@@ -59,4 +59,5 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
                   "zip_code",
                   "neighborhood",
                   "role",
+                  "username",
                   )

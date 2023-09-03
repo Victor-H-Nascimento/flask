@@ -32,4 +32,5 @@ class VetSchema(ma.SQLAlchemyAutoSchema):
                   "name",
                   "role",
                   "clinica_id",
+                  "username",
                   )

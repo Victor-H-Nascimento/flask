@@ -5,7 +5,7 @@ from http import HTTPStatus
 from loguru import logger
 
 from src import api, users_namespace as app
-from src.models import User, UserSchema
+from src.models import Pet, PetSchema, User, UserSchema
 from src.routers.helpers import get_response, configure_session
 
 
@@ -179,3 +179,28 @@ class RouteUserWithId(Resource):
                 msg = f'Unable to delete user with id {id}. Rollback executed: {str(e)}'
                 logger.exception(msg)
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+
+
+@app.route('/<int:id>/pets')
+class RoutePetFromUserId(Resource):
+    @app.doc('list all pets from an user')
+    def get(self, id: int):
+        '''Mostra todos os pets de um usuario'''
+        with closing(configure_session()) as session:
+            try:
+                user: User = session.query(User).filter(
+                    User.activated).filter(User.id == id).first()
+                if not user:
+                    return get_response(HTTPStatus.NO_CONTENT, None)
+
+                pets: Pet = session.query(Pet).filter(
+                    Pet.activated).filter(Pet.user_id == id).order_by(Pet.name).all()
+                if not pets:
+                    return get_response(HTTPStatus.NO_CONTENT, None)
+                return PetSchema(many=True).dump(pets)
+            except Exception as e:
+                session.rollback()
+                msg = f'Unable to list all pets. Rollback executed: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+            

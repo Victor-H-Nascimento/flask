@@ -65,5 +65,6 @@ class ClinicaSchema(ma.SQLAlchemyAutoSchema):
                   "neighborhood",
                   "role",
                   "services",
+                  "username",
                   )
     services = ma.List(ma.Nested(ServicesSchema))

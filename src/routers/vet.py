@@ -5,7 +5,7 @@ from http import HTTPStatus
 from loguru import logger
 
 from src import api, vets_namespace as app
-from src.models import Vet, VetSchema, Clinica
+from src.models import Vet, VetSchema
 from src.routers.helpers import get_response, configure_session
 
 vet_model_create = api.model('VetCreate', {
@@ -127,29 +127,5 @@ class RouteVetWithId(Resource):
             except Exception as e:
                 session.rollback()
                 msg = f'Unable to delete vet with id {id}. Rollback executed: {str(e)}'
-                logger.exception(msg)
-                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
-
-
-@app.route('/clinicas/<int:id>')
-class RouteVetFromClinica(Resource):
-    @app.doc('list all vets from a clinic')
-    def get(self, id: int):
-        '''Mostra todos os vets de uma clinica.'''
-        with closing(configure_session()) as session:
-            try:
-                clinica: Clinica = session.query(Clinica).filter(
-                    Clinica.activated).filter(Clinica.id == id).first()
-                if not clinica:
-                    return get_response(HTTPStatus.NO_CONTENT, None)
-
-                vets: Vet = session.query(Vet).filter(
-                    Vet.activated).filter(Vet.clinica_id == id).order_by(Vet.name).all()
-                if not vets:
-                    return get_response(HTTPStatus.NO_CONTENT, None)
-                return VetSchema(many=True).dump(vets)
-            except Exception as e:
-                session.rollback()
-                msg = f'Unable to list all vets. Rollback executed: {str(e)}'
                 logger.exception(msg)
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)

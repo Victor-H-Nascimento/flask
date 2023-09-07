@@ -3,6 +3,7 @@ from flask import request
 from flask_restx import Resource, fields
 from http import HTTPStatus
 from loguru import logger
+from sqlalchemy import not_
 
 from src import api, pets_namespace as app
 from src.models import Clinica, ClinicaSchema, Pet, PetSchema, pets_clinicas
@@ -237,20 +238,51 @@ class RoutePetConnect(Resource):
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
 
 
-@app.route('/<int:id>/services')
+@app.route('/<int:id>/clinicas/conectadas')
 class RoutePetShowServices(Resource):
     def get(self, id: int):
-        '''Mostra todos os serviços que um pet esteja conectado'''
+        '''Mostra todos as clinicas que um pet esteja conectado'''
         with closing(configure_session()) as session:
             try:
                 pet: Pet = session.query(Pet).filter(Pet.activated).filter(Pet.id == id).first()
                 if not pet:
                     return get_response(HTTPStatus.NO_CONTENT, None)
                 
-                clinicas: Clinica = session.query(Clinica).outerjoin(pets_clinicas, pets_clinicas.c.pets_id == Clinica.id).order_by(Clinica.name).all()
+                clinicas: Clinica = session.query(Clinica) \
+                .outerjoin(pets_clinicas, pets_clinicas.c.clinicas_id == Clinica.id) \
+                .filter(pet.id == pets_clinicas.c.pets_id) \
+                .order_by(Clinica.name).all()
 
                 return ClinicaSchema(many=True).dump(clinicas)
             except Exception as e:
-                msg = f'Unable to list all services a pet is connected: {str(e)}'
+                msg = f'Unable to list all clinicas a pet is connected: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+            
+
+@app.route('/<int:id>/clinicas/nao-conectadas')
+class RoutePetShowServices(Resource):
+    def get(self, id: int):
+        '''Mostra todos as clinicas que um pet nao esteja conectado'''
+        with closing(configure_session()) as session:
+            try:
+                pet: Pet = session.query(Pet).filter(Pet.activated).filter(Pet.id == id).first()
+                if not pet:
+                    return get_response(HTTPStatus.NO_CONTENT, None)
+                
+                clinicas_tuple: Clinica = session.query(Clinica.id) \
+                .outerjoin(pets_clinicas, pets_clinicas.c.clinicas_id == Clinica.id) \
+                .filter(pet.id == pets_clinicas.c.pets_id) \
+                .order_by(Clinica.name).all()
+                
+                clinicas_ids = [id[0] for id in clinicas_tuple]
+
+                clinicas: Clinica = session.query(Clinica) \
+                .filter(not_(Clinica.id.in_(clinicas_ids))) \
+                .order_by(Clinica.name).all()
+
+                return ClinicaSchema(many=True).dump(clinicas)
+            except Exception as e:
+                msg = f'Unable to list all clinicas a pet is connected: {str(e)}'
                 logger.exception(msg)
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)

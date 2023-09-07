@@ -148,7 +148,6 @@ def create_vets(session: Session):
                 'username': 'admin.silva',
                 'pwd': 'admin',
                 'clinica_id': clinica_id,
-                
             },
         ]
         

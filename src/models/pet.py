@@ -1,4 +1,5 @@
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 from src import db, ma
 
@@ -16,6 +17,8 @@ class Pet(db.Model):
     activated = db.Column(db.Boolean, nullable=False)
     description = db.Column(db.Text(), nullable=True)
     user_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=True)
+
+    timeline = relationship("Timeline", backref="timeline")
 
     def __init__(self, name: str, size: str, breed: str, age: str, castrated: bool,
                 weight: float, specie: str, gender: str, user_id: int, description: str, activated: bool = True):

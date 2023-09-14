@@ -6,8 +6,10 @@ from loguru import logger
 from sqlalchemy import not_
 
 from src import api, pets_namespace as app
-from src.models import Clinica, ClinicaSchema, Pet, PetSchema, pets_clinicas
+from src.models import Clinica, ClinicaSchema, Pet, PetSchema, Timeline, TimelineSchema
+from src.models import pets_clinicas
 from src.routers.helpers import get_response, configure_session
+
 
 pet_model_create = api.model('PetCreate', {
     'name': fields.String(required=True, description='Nome do Pet'),
@@ -21,6 +23,7 @@ pet_model_create = api.model('PetCreate', {
     'user_id': fields.Integer(required=True, description='Id do Tutor do Pet'),
     'description': fields.String(required=False, description='Breve Descriçao do Pet'),
 })
+
 
 pet_model_update = api.model('PetUpdate', {
     'name': fields.String(required=False, description='Nome do Pet'),
@@ -39,6 +42,24 @@ pet_clinica_model = api.model('Pet-Clinica-Connect', {
     'clinica': fields.Integer(description='ID da clinica', required=True),
     'pet': fields.Integer(description='ID do pet', required=True)
 })
+
+
+timeline_item_create = api.model('TimelineCreate', {
+    'type': fields.String(required=True, description='Tipo do Item'),
+    'title': fields.String(required=True, description='Titulo do Item'),
+    'description': fields.String(required=True, description='Descrição do Item'),
+    'vet': fields.String(required=True, description='Veterinário do Item'),
+    'clinic': fields.String(required=True, description='Clinica do Item'),
+})
+
+timeline_item_update = api.model('TimelineUpdate', {
+    'type': fields.String(required=False, description='Tipo do Item'),
+    'title': fields.String(required=False, description='Titulo do Item'),
+    'description': fields.String(required=False, description='Descrição do Item'),
+    'vet': fields.String(required=False, description='Veterinário do Item'),
+    'clinic': fields.String(required=False, description='Clinica do Item'),
+})
+
 
 @app.route('')
 class RoutePet(Resource):
@@ -286,3 +307,114 @@ class RoutePetShowServices(Resource):
                 msg = f'Unable to list all clinicas a pet is connected: {str(e)}'
                 logger.exception(msg)
                 return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+
+
+@app.route('/<int:id>/timeline')
+class RoutePetShowTimeline(Resource):
+    @app.doc('list_timeline')
+    def get(self, id: int):
+        '''Lista timeline'''
+        with closing(configure_session()) as session:
+            try:
+                timeline: Timeline = session.query(Timeline).filter(
+                    Timeline.activated).filter(Timeline.pet_id == id).order_by(Timeline.created_date).all()
+                if not timeline:
+                    return get_response(HTTPStatus.NO_CONTENT, None)
+                return TimelineSchema(many=True).dump(timeline)
+            except Exception as e:
+                msg = f'Unable to list timeline: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+            
+
+    @app.doc('create_timeline')
+    @app.expect(timeline_item_create)
+    def post(self, id: int):
+        '''Cria um novo item na timeline'''
+        with closing(configure_session()) as session:
+            try:
+
+                pet: Pet = session.query(Pet).filter(
+                    Pet.activated).filter(Pet.id == id).first()
+                if not pet:
+                    return get_response(HTTPStatus.NO_CONTENT, None)
+
+                type: str = request.json.get('type')
+                title: str = request.json.get('title')
+                description: str = request.json.get('description')
+                vet: str = request.json.get('vet')
+                clinic: str = request.json.get('clinic')
+                
+                if None in (type, title, description, vet, clinic):
+                    return get_response(HTTPStatus.BAD_REQUEST, "Unable to create timeline item. Missing at least one mandatory field")
+
+                timeline = Timeline(type, title, description, vet, clinic, id)
+                session.add(timeline)
+                session.commit()
+                return TimelineSchema().dump(timeline), HTTPStatus.CREATED
+            except Exception as e:
+                session.rollback()
+                msg = f'Unable to create a new timeline item. Rollback executed: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+            
+
+@app.route('/<int:timeline_id>/timeline')
+class RoutePetEditAndDeleteTimeline(Resource):
+
+    @app.doc('update_timeline_item')
+    @app.expect(timeline_item_update)
+    def put(self, timeline_id: int):
+        '''Atualiza os dados de um item na timeline'''
+        with closing(configure_session()) as session:
+            try:
+                timeline: Timeline = session.query(Timeline).filter(
+                    Timeline.activated).filter(Timeline.id == timeline_id).first()
+                if not timeline:
+                    return get_response(HTTPStatus.NO_CONTENT, None)
+                
+                type: str = request.json.get('type')
+                title: str = request.json.get('title')
+                description: str = request.json.get('description')
+                vet: str = request.json.get('vet')
+                clinic: str = request.json.get('clinic')
+                
+                if type:
+                    timeline.type = type
+                if title:
+                    timeline.title = title
+                if description:
+                    timeline.description = description
+                if vet:
+                    timeline.vet = vet
+                if clinic:
+                    timeline.clinic = clinic
+                
+                session.commit()
+
+                return TimelineSchema().dump(timeline)
+
+            except Exception as e:
+                session.rollback()
+                msg = f'Unable to update timeline item with id {timeline_id}. Rollback executed: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+
+    @app.doc('delete_timeline_item')
+    def delete(self, timeline_id: int):
+        '''Deleta um item da Timeline'''
+        with closing(configure_session()) as session:
+            try:
+                timeline: Timeline = session.query(Timeline).filter(
+                    Timeline.activated).filter(Timeline.id == timeline_id).first()
+                if not timeline:
+                    return get_response(HTTPStatus.NO_CONTENT, None)
+                timeline.activated = False
+                session.commit()
+                return get_response(HTTPStatus.OK, f"Timeline item with id {timeline_id} successfully deactivated")
+            except Exception as e:
+                session.rollback()
+                msg = f'Unable to delete timeline item with id {timeline_id}. Rollback executed: {str(e)}'
+                logger.exception(msg)
+                return get_response(HTTPStatus.INTERNAL_SERVER_ERROR, msg)
+            

@@ -212,7 +212,6 @@ def create_timeline(session: Session):
             {
                 'type': 'Consulta',
                 'title': 'Diagnóstico de Giárdia',
-                'created_date': datetime.today(),
                 'description': '''Lily foi atendida e aparentava não estar muito mal, tutora relatou que havia aprensentado diarréia
                                 no dia anterior. Foi feito teste rápido na presença da tutora para Parvivirose, que teve resultado
                                 negativo. Foi indicada a internação da paciente por 24 horas para acompanhamento do quadro e medicação.''',
@@ -223,7 +222,6 @@ def create_timeline(session: Session):
             {
                 'type': 'Procedimento',
                 'title': 'Internação 24h',
-                'created_date': datetime.today(),
                 'description': '''Lily ficou internada e fez diversos exames''',
                 'vet': 'Luís Cardoso',
                 'clinic': 'Pet&Amor',
@@ -232,7 +230,6 @@ def create_timeline(session: Session):
             {
                 'type': 'Consulta',
                 'title': 'Diagnóstico de Giárdia',
-                'created_date': datetime.today(),
                 'description': '''Nick foi atendido e aparentava não estar muito mal, tutora relatou que havia aprensentado diarréia
                                 no dia anterior. Foi feito teste rápido na presença da tutora para Parvivirose, que teve resultado
                                 negativo. Foi indicada a internação da paciente por 24 horas para acompanhamento do quadro e medicação.''',
@@ -243,7 +240,6 @@ def create_timeline(session: Session):
             {
                 'type': 'Procedimento',
                 'title': 'Alta',
-                'created_date': datetime.today(),
                 'description': '''Lily recebeu alta no dia seguinte''',
                 'vet': 'Luís Cardoso',
                 'clinic': 'Pet&Amor',
@@ -252,6 +248,6 @@ def create_timeline(session: Session):
         ]
         
         for timeline in timelines:
-            session.add(Timeline(timeline['type'], timeline['title'], timeline['created_date'], timeline['description'],
+            session.add(Timeline(timeline['type'], timeline['title'], timeline['description'],
                                   timeline['vet'], timeline['clinic'], timeline['pet_id']))
         session.commit()

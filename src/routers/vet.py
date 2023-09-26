@@ -51,6 +51,12 @@ class RouteVet(Resource):
 
                 if None in (name, username, pwd, clinica_id):
                     return get_response(HTTPStatus.BAD_REQUEST, "Unable to create vet. Missing at least one mandatory field")
+                
+                vet: Vet = session.query(Vet).filter(
+                    Vet.activated).filter(Vet.username == username).first()
+                
+                if vet:
+                    return get_response(HTTPStatus.BAD_REQUEST, f"Unable to create vet. Username {username} already exists")
 
                 vet = Vet(name, username, pwd, clinica_id)
                 session.add(vet)

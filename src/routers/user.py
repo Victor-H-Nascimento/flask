@@ -12,7 +12,6 @@ from src.routers.helpers import get_response, configure_session
 user_model_create = api.model('UserCreate', {
     'email': fields.String(required=True, description='Email do Usuário'),
     'name': fields.String(required=True, description='Nome do Usuário'),
-    'lastname': fields.String(required=True, description='Sobrenome do Usuário'),
     'username': fields.String(required=True, description='Username do Usuário'),
     'document': fields.String(required=True, description='CPF/RG do Usuário'),
     'phone_number': fields.String(required=True, description='Telefone do Usuário'),
@@ -27,7 +26,6 @@ user_model_create = api.model('UserCreate', {
 user_model_update = api.model('UserUpdate', {
     'email': fields.String(required=False, description='Email do Usuário'),
     'name': fields.String(required=False, description='Nome do Usuário'),
-    'lastname': fields.String(required=False, description='Sobrenome do Usuário'),
     'username': fields.String(required=False, description='Username do Usuário'),
     'document': fields.String(required=False, description='CPF/RG do Usuário'),
     'phone_number': fields.String(required=False, description='Telefone do Usuário'),
@@ -64,7 +62,6 @@ class RouteUser(Resource):
         with closing(configure_session()) as session:
             try:
                 name: str = request.json.get('name')
-                lastname: str = request.json.get('lastname')
                 username: str = request.json.get('username')
                 email: str = request.json.get('email')
                 document: str = request.json.get('document')
@@ -75,10 +72,10 @@ class RouteUser(Resource):
                 zip_code: str = request.json.get('zip_code')
                 neighborhood: str = request.json.get('neighborhood')
 
-                if None in (name, lastname, username, email, document, phone_number, pwd):
+                if None in (name, username, email, document, phone_number, pwd):
                     return get_response(HTTPStatus.BAD_REQUEST, "Unable to create user. Missing at least one mandatory field")
 
-                user = User(email, name, lastname, document, phone_number, pwd, address, number, zip_code, neighborhood, username)
+                user = User(email, name, document, phone_number, pwd, address, number, zip_code, neighborhood, username)
                 session.add(user)
                 session.commit()
                 return UserSchema().dump(user), HTTPStatus.CREATED
@@ -120,7 +117,6 @@ class RouteUserWithId(Resource):
                     return get_response(HTTPStatus.NO_CONTENT, None)
                 
                 name: str = request.json.get('name')
-                lastname: str = request.json.get('lastname')
                 username: str = request.json.get('username')
                 email: str = request.json.get('email')
                 document: str = request.json.get('document')
@@ -132,8 +128,6 @@ class RouteUserWithId(Resource):
 
                 if name:
                     user.name = name
-                if lastname:
-                    user.lastname = lastname
                 if username:
                     user.username = username
                 if email:

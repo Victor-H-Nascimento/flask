@@ -1,6 +1,5 @@
 
 from contextlib import closing
-from datetime import datetime
 from flask_restx import Resource
 from http import HTTPStatus
 from loguru import logger
@@ -44,7 +43,6 @@ def create_user(session: Session):
         user = {
             'email': 'admin@admin.com',
             'name': 'admin',
-            'lastname': 'admin',
             'document': '123456789',
             'phone_number': '123456789',
             'pwd': 'admin',
@@ -55,7 +53,7 @@ def create_user(session: Session):
             'username': 'admin',
         }
 
-        session.add(User(user['email'], user['name'], user['lastname'], user['document'],
+        session.add(User(user['email'], user['name'], user['document'],
                         user['phone_number'], user['pwd'], user['address'], user['number'],
                         user['zip_code'], user['neighborhood'], user['username']))
         session.commit()
@@ -218,6 +216,8 @@ def create_timeline(session: Session):
                 'vet': 'Luís Cardoso',
                 'clinic': 'Pet&Amor',
                 'pet_id': 1,
+                'created_by_id': 1,
+                'created_by_role': 'user'
             },
             {
                 'type': 'Procedimento',
@@ -226,6 +226,8 @@ def create_timeline(session: Session):
                 'vet': 'Luís Cardoso',
                 'clinic': 'Pet&Amor',
                 'pet_id': 1,
+                'created_by_id': 1,
+                'created_by_role': 'vet'
             },
             {
                 'type': 'Consulta',
@@ -236,6 +238,8 @@ def create_timeline(session: Session):
                 'vet': 'Luís Cardoso',
                 'clinic': 'Pet&Amor',
                 'pet_id': 2,
+                'created_by_id': 1,
+                'created_by_role': 'clinica'
             },
             {
                 'type': 'Procedimento',
@@ -244,10 +248,14 @@ def create_timeline(session: Session):
                 'vet': 'Luís Cardoso',
                 'clinic': 'Pet&Amor',
                 'pet_id': 1,
+                'created_by_id': 2,
+                'created_by_role': 'user'
             },
         ]
         
         for timeline in timelines:
             session.add(Timeline(timeline['type'], timeline['title'], timeline['description'],
-                                  timeline['vet'], timeline['clinic'], timeline['pet_id']))
+                                  timeline['vet'], timeline['clinic'], timeline['pet_id'],
+                                  timeline['created_by_id'], timeline['created_by_role'],
+                                ))
         session.commit()

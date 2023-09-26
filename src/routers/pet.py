@@ -6,7 +6,7 @@ from loguru import logger
 from sqlalchemy import not_
 
 from src import api, pets_namespace as app
-from src.models import Clinica, ClinicaSchema, Pet, PetSchema, Timeline, TimelineSchema
+from src.models import Clinica, ClinicaSchema, Pet, PetSchema, Timeline, TimelineSchema, User
 from src.models import pets_clinicas
 from src.routers.helpers import get_response, configure_session
 
@@ -50,6 +50,8 @@ timeline_item_create = api.model('TimelineCreate', {
     'description': fields.String(required=True, description='Descrição do Item'),
     'vet': fields.String(required=True, description='Veterinário do Item'),
     'clinic': fields.String(required=True, description='Clinica do Item'),
+    'created_by_id': fields.Integer(required=True, description='Id de quem criou o Item'),
+    'created_by_role': fields.String(required=True, description='Role de quem criou o Item'),
 })
 
 timeline_item_update = api.model('TimelineUpdate', {
@@ -344,11 +346,18 @@ class RoutePetShowTimeline(Resource):
                 description: str = request.json.get('description')
                 vet: str = request.json.get('vet')
                 clinic: str = request.json.get('clinic')
+                created_by_id: int = request.json.get('created_by_id')
+                created_by_role: str = request.json.get('created_by_role')
                 
-                if None in (type, title, description, vet, clinic):
+                if None in (type, title, description, vet, clinic, created_by_id, created_by_role):
                     return get_response(HTTPStatus.BAD_REQUEST, "Unable to create timeline item. Missing at least one mandatory field")
+                
+                user: User = session.query(User).filter(
+                    User.activated).filter(User.id == created_by_id).first()
+                if not user:
+                    return get_response(HTTPStatus.BAD_REQUEST, f"Unable to get user with id {created_by_id}")
 
-                timeline = Timeline(type, title, description, vet, clinic, id)
+                timeline = Timeline(type, title, description, vet, clinic, id, created_by_id, created_by_role.lower())
                 session.add(timeline)
                 session.commit()
                 return TimelineSchema().dump(timeline), HTTPStatus.CREATED

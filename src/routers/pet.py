@@ -6,7 +6,7 @@ from loguru import logger
 from sqlalchemy import not_
 
 from src import api, pets_namespace as app
-from src.models import Clinica, ClinicaSchema, Pet, PetSchema, Timeline, TimelineSchema, User
+from src.models import Clinica, ClinicaSchema, Pet, PetSchema, Timeline, TimelineSchema, User, Vet
 from src.models import pets_clinicas
 from src.routers.helpers import get_response, configure_session
 
@@ -352,11 +352,23 @@ class RoutePetShowTimeline(Resource):
                 if None in (type, title, description, vet, clinic, created_by_id, created_by_role):
                     return get_response(HTTPStatus.BAD_REQUEST, "Unable to create timeline item. Missing at least one mandatory field")
                 
-                user: User = session.query(User).filter(
-                    User.activated).filter(User.id == created_by_id).first()
-                if not user:
-                    return get_response(HTTPStatus.BAD_REQUEST, f"Unable to get user with id {created_by_id}")
-
+                match created_by_role.lower():
+                    case 'user':
+                        user: User = session.query(User).filter(
+                        User.activated).filter(User.id == created_by_id).first()
+                        if not user:
+                            return get_response(HTTPStatus.BAD_REQUEST, f"Unable to get user with id {created_by_id}")
+                    case 'clinica':
+                        clinica: Clinica = session.query(Clinica).filter(
+                        Clinica.activated).filter(Clinica.id == created_by_id).first()
+                        if not clinica:
+                            return get_response(HTTPStatus.BAD_REQUEST, f"Unable to get clinica with id {created_by_id}")
+                    case 'vet':
+                        vet: Vet = session.query(Vet).filter(
+                        Vet.activated).filter(Vet.id == created_by_id).first()
+                        if not vet:
+                            return get_response(HTTPStatus.BAD_REQUEST, f"Unable to get vet with id {created_by_id}")
+                
                 timeline = Timeline(type, title, description, vet, clinic, id, created_by_id, created_by_role.lower())
                 session.add(timeline)
                 session.commit()

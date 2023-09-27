@@ -46,13 +46,12 @@ class RouteLogin(Resource):
                 token = jwt.encode({
                     'id': user.id,
                     'name': user.name,
-                    'lastname': user.lastname,
                     'role': user.role,
                     'exp': datetime.utcnow() + timedelta(minutes=int(os.getenv('JWT_TOKEN_TIMEOUT_MINS')))
                 }, os.getenv('JWT_CRYPT_KEY'), algorithm="HS256")
 
                 logger.info(
-                    f"{user.role.capitalize()} {user.name} {user.lastname} logged in successfully")
+                    f"{user.role.capitalize()} {user.name} logged in successfully")
 
                 return make_response(jsonify({
                     'token': token,

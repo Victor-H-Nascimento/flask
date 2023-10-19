@@ -349,7 +349,7 @@ class RoutePetShowTimeline(Resource):
                 created_by_id: int = request.json.get('created_by_id')
                 created_by_role: str = request.json.get('created_by_role')
                 
-                if None in (type, title, description, vet, clinic, created_by_id, created_by_role):
+                if None in (type, title, description, veterinarian, clinic, created_by_id, created_by_role):
                     return get_response(HTTPStatus.BAD_REQUEST, "Unable to create timeline item. Missing at least one mandatory field")
                 
                 match created_by_role.lower():

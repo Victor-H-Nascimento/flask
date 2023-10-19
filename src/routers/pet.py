@@ -344,7 +344,7 @@ class RoutePetShowTimeline(Resource):
                 type: str = request.json.get('type')
                 title: str = request.json.get('title')
                 description: str = request.json.get('description')
-                vet: str = request.json.get('vet')
+                veterinarian: str = request.json.get('vet')
                 clinic: str = request.json.get('clinic')
                 created_by_id: int = request.json.get('created_by_id')
                 created_by_role: str = request.json.get('created_by_role')
@@ -369,7 +369,7 @@ class RoutePetShowTimeline(Resource):
                         if not vet:
                             return get_response(HTTPStatus.BAD_REQUEST, f"Unable to get vet with id {created_by_id}")
                 
-                timeline = Timeline(type, title, description, vet, clinic, id, created_by_id, created_by_role.lower())
+                timeline = Timeline(type, title, description, veterinarian, clinic, id, created_by_id, created_by_role.lower())
                 session.add(timeline)
                 session.commit()
                 return TimelineSchema().dump(timeline), HTTPStatus.CREATED

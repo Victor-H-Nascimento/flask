@@ -191,6 +191,12 @@ class RoutePetWithId(Resource):
                     Pet.activated).filter(Pet.id == id).first()
                 if not pet:
                     return get_response(HTTPStatus.NO_CONTENT, None)
+                clinicas: Clinica = session.query(Clinica).filter(Clinica.activated).all()
+                for clinica in clinicas:
+                    clinica: Clinica
+                    if pet in clinica.pets:
+                        clinica.pets.remove(pet)
+
                 pet.activated = False
                 session.commit()
                 return get_response(HTTPStatus.OK, f"Pet {pet.name} successfully deactivated")

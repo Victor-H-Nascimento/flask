@@ -159,6 +159,9 @@ class RouteClinicaWithId(Resource):
                     Clinica.activated).filter(Clinica.id == id).first()
                 if not clinica:
                     return get_response(HTTPStatus.NO_CONTENT, None)
+                
+                clinica.pets.clear()
+
                 clinica.activated = False
                 session.commit()
                 return get_response(HTTPStatus.OK, f"Clinica {clinica.name} successfully deactivated")

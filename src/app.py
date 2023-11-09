@@ -35,9 +35,9 @@ def make_imports_into_app():
 app: Flask = create_app()
 
 api = Api(app,
-          version='2.1',
-          title='Dogpass API',
-          description='O que falar dessa api que mal conheço e já considero pacas?'
+          version='2.0',
+          title='Petpass API',
+          description='Api Petpass: Prontuário Pet Digital'
           )
 
 users_namespace = api.namespace('users', description='Operações de usuário')
